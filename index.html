@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>🧬 شؤون الهلال الأحمر 🧬</title>
+    <style>
+        body {
+            font-family: "Tahoma", sans-serif;
+            background-image: url('https://raw.githubusercontent.com/xhhp1/medicaljpg/main/medic.jpg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 20px;
+            color: #000;
+        }
+        .main-wrapper {
+            display: flex;
+            gap: 20px;
+            max-width: 1250px;
+            margin: auto;
+            align-items: flex-start;
+        }
+        .overlay {
+            background-color: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            flex: 2;
+            padding: 25px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5);
+        }
+        .roles-box {
+            background-color: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            flex: 1;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            display: none;
+            position: sticky;
+            top: 20px;
+            border: 2px solid #8B0000;
+        }
+        h2, h3 { text-align: center; color: #8B0000; border-bottom: 2px solid #8B0000; padding-bottom: 10px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #8B0000; }
+        input, select {
+            width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #ccc;
+            text-align: right; font-size: 15px; box-sizing: border-box;
+        }
+        .search-container { position: relative; }
+        .results-list {
+            position: absolute; width: 100%; background: white; border: 1px solid #ddd;
+            border-radius: 0 0 10px 10px; max-height: 250px; overflow-y: auto; z-index: 9999; display: none;
+        }
+        .results-list div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 14px; }
+        .results-list div:hover { background-color: #8B0000; color: white; }
+        
+        button.generate {
+            margin-top: 20px; padding: 15px; background-color: #8B0000; color: white;
+            border: none; border-radius: 10px; cursor: pointer; font-size: 18px; width: 100%; font-weight: bold;
+        }
+        pre {
+            background: #fff; padding: 20px; border-radius: 10px; margin-top: 15px; white-space: pre-wrap;
+            direction: ltr; text-align: right; border: 1px dashed #8B0000; font-size: 14px; line-height: 1.4;
+        }
+        .copy-btn { background-color: #333; margin-top: 5px; padding: 10px; color: white; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 14px; }
+        #nameFieldContainer { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="overlay">
+        <h2>🧬 شؤون الهلال الأحمر 🧬</h2>
+        
+        <label>الكوبي يوزر آيدي (Discord ID):</label>
+        <input type="text" id="copyIdInput" placeholder="أدخل الآيدي هنا...">
+
+        <label>البحث عن مسمى المخالفة:</label>
+        <div class="search-container">
+            <input type="text" id="vSearch" placeholder="ابحث عن المخالفة المضافة حديثاً..." oninput="doSearch()">
+            <div id="resList" class="results-list"></div>
+        </div>
+
+        <div id="nameFieldContainer">
+            <label>اسم المسعف وكوده الميداني:</label>
+            <input type="text" id="medicNameInput" placeholder="اكتب الاسم والكود هنا...">
+        </div>
+
+        <label>اختيار التوقيع:</label>
+        <select id="sigChoice">
+            <option value="">-- اختر مسمى المسؤول --</option>
+            <option value="<@&1071933358503903242>">قائد الهلال الاحمر</option>
+            <option value="<@&1071933359086911561>">نائب قائد الهلال الاحمر</option>
+            <option value="<@&1092667422902862004>">مساعد قائد الهلال الاحمر</option>
+            <option value="<@&1153823182281777293>">نائب مساعد قائد الهلال الاحمر</option>
+            <option value="<@&1164572574391476264>">مشرف عام</option>
+            <option value="<@&1071933366934458489>">مشرف ميداني</option>
+        </select>
+
+        <button class="generate" onclick="makeDecision()">إنشاء القرار</button>
+        <pre id="finalBox">سيظهر القرار هنا...</pre>
+        <button class="copy-btn" onclick="copyText('finalBox')">نسخ نص القرار</button>
+    </div>
+
+    <div id="rolesPanel" class="roles-box">
+        <h3>طلب الرولات</h3>
+        <label>اختر نوع الإزالة:</label>
+        <button style="background:#8B0000; color:white; border:none; padding:10px; border-radius:8px; width:100%; margin-top:10px; cursor:pointer;" onclick="generateRoleReq(14)">إزالة + اسم + منع (14 يوم)</button>
+        <button style="background:#8B0000; color:white; border:none; padding:10px; border-radius:8px; width:100%; margin-top:10px; cursor:pointer;" onclick="generateRoleReq(7)">إزالة + اسم + منع (7 أيام)</button>
+        <button style="background:#8B0000; color:white; border:none; padding:10px; border-radius:8px; width:100%; margin-top:10px; cursor:pointer;" onclick="generateRoleReq(0)">إزالة رولات + اسم فقط</button>
+        
+        <pre id="roleResultBox" style="font-size: 12px; margin-top: 15px;"></pre>
+        <button class="copy-btn" onclick="copyText('roleResultBox')">نسخ طلب الرول</button>
+    </div>
+</div>
+
+<script>
+// قاعدة البيانات الشاملة لجميع المخالفات المرسلة أخيراً
+const db = [
+    // --- الشفهي ---
+    { t: "التواجد في روم العمليات اكثر من 3 دقائق", cat: "shfhi" },
+    { t: "عدم الحضور للأستدعاء + سبب للأستدعاء", cat: "shfhi" },
+    { t: "اركاب مواطن معه في سيارة الاسعاف", cat: "shfhi" },
+    { t: "فتح تكت تظلم غير صحيح", cat: "shfhi" },
+    { t: "عدم تغيير الاسم في الفايف ام", cat: "shfhi" },
+    { t: "تسجيل خروج بدون ابلاغ طاقم العمليات", cat: "shfhi" },
+    { t: "اهمال مركبة", cat: "shfhi" },
+    { t: "قيادة غير واقعية", cat: "shfhi" },
+    { t: "الكتابة أثناء المنع او التنقيط", cat: "shfhi" },
+    { t: "عدم طلب كود 8", cat: "shfhi" },
+    { t: "عدم الإلتزام في قوانين الهلال الأحمر", cat: "shfhi" },
+    { t: "اهمال الراديو", cat: "shfhi" },
+    { t: "منشن الرقابة في رسائل الهلال الاحمر او التكتات", cat: "shfhi" },
+    { t: "عدم تسليم العمليات عند الخروج", cat: "shfhi" },
+    { t: "المباشرة بدون الدخول للموجة", cat: "shfhi" },
+    { t: "مباشرة في موقع غير موجه لك", cat: "shfhi" },
+    { t: "مباشرة بدون تسجيل دخول", cat: "shfhi" },
+    { t: "رفض توجيه العمليات", cat: "shfhi" },
+    { t: "ازعاج منسوبي الشؤون الإدارية", cat: "shfhi" },
+    { t: "اثارة الجدل في الشات العام", cat: "shfhi" },
+    { t: "عدم التزام ببروتوكولات الراديو", cat: "shfhi" },
+    { t: "عدم المباشرة بعد مرور 5 دقائق من طلب كود 8", cat: "shfhi" },
+    { t: "عدم اعطاء الكود الميداني", cat: "shfhi" },
+    { t: "مخالفة قوانين التكت", cat: "shfhi" },
+    { t: "التأخير بالوصول للمسقطين", cat: "shfhi" },
+    { t: "دخول استنفار أمني أو المباشرة بدون اذن", cat: "shfhi" },
+    { t: "التدخل في شؤون القطاعات الاخرى", cat: "shfhi" },
+    { t: "اسلوب غير لائق", cat: "shfhi" },
+    { t: "عدم طلب كود 3", cat: "shfhi" },
+    { t: "الخروج مشتركة", cat: "shfhi" },
+    { t: "الأفك او الغفوة اكثر من 15 دقيقة", cat: "shfhi" },
+    { t: "سجن رقابي بوظيفة الهلال الأحمر", cat: "shfhi" },
+    { t: "التأخر في العودة للوظيفة بعد انتهاء الاجازة الداخلية", cat: "shfhi" },
+    { t: "كثرة الشكاوي عليه", cat: "shfhi" },
+    { t: "الرد بطريقة غير مناسبة بالموجه", cat: "shfhi" },
+    { t: "التدخل في الشؤون الادارية", cat: "shfhi" },
+    { t: "التلاعب على مسؤولين الترقيات", cat: "shfhi" },
+    { t: "التلاعب في دفتر الحضور", cat: "shfhi" },
+    { t: "اهانة اي شخص بالمقاطعة", cat: "shfhi" },
+    { t: "المباشرة في موقع غير آمن", cat: "shfhi" },
+    { t: "التوجه لمعرض السيارات بدون اذن", cat: "shfhi" },
+    { t: "التوجه لكراج التعديل والتزويد بدون اذن", cat: "shfhi" },
+    { t: "عدم الإلتزام بقوانين الإجازة الداخلية", cat: "shfhi" },
+    { t: "دخول برنامج الدولة لطلب الانعاش وقت الاجازة", cat: "shfhi" },
+    { t: "الدخول لموجة الرقابة", cat: "shfhi" },
+    { t: "تظليل مركبة حكومية", cat: "shfhi" },
+    { t: "الدخول لروم الكادر النسائي", cat: "shfhi" },
+    { t: "الاستهبال في روم العمليات", cat: "shfhi" },
+    { t: "مباشرة في مركبة غير مخصصه لك", cat: "shfhi" },
+    { t: "الاعتراض على مخالفة صحيحة", cat: "shfhi" },
+
+    // --- 200 ألف ---
+    { t: "التواجد في روم العمليات اكثر من 3 دقائق", cat: "200k" },
+    { t: "عدم الحضور للأستدعاء+ سبب المخالفة", cat: "200k" },
+    { t: "اركاب مواطن معه في سيارة الاسعاف", cat: "200k" },
+    { t: "فتح تكت تظلم غير صحيح", cat: "200k" },
+    { t: "عدم تغيير الاسم في الفايف ام", cat: "200k" },
+    { t: "تسجيل خروج بدون ابلاغ طاقم العمليات", cat: "200k" },
+    { t: "اهمال مركبة", cat: "200k" },
+    { t: "قيادة غير واقعية", cat: "200k" },
+
+    // --- 300 ألف ---
+    { t: "الاعتراض على مخالفة صحيحة", cat: "300k" },
+    { t: "الكتابة أثناء المنع او التنقيط", cat: "300k" },
+    { t: "عدم الإلتزام في قوانين الهلال الأحمر", cat: "300k" },
+    { t: "اهمال الراديو", cat: "300k" },
+    { t: "منشن الرقابة في رسائل الهلال الاحمر او التكتات", cat: "300k" },
+    { t: "عدم تسليم العمليات عند الخروج", cat: "300k" },
+    { t: "المباشرة بدون الدخول للموجة", cat: "300k" },
+    { t: "مباشرة في موقع غير موجه لك", cat: "300k" },
+    { t: "مباشرة بدون تسجيل دخول", cat: "300k" },
+    { t: "رفض توجيه العمليات", cat: "300k" },
+    { t: "ازعاج منسوبي الشؤون الإدارية", cat: "300k" },
+    { t: "اثارة الجدل في الشات العام", cat: "300k" },
+    { t: "عدم التزام ببروتوكولات الراديو", cat: "300k" },
+    { t: "عدم المباشرة بعد مرور 5 دقائق من طلب كود 8", cat: "300k" },
+    { t: "عدم اعطاء الكود الميداني", cat: "300k" },
+    { t: "مخالفة قوانين التكت", cat: "300k" },
+    { t: "التأخير بالوصول للمسقطين", cat: "300k" },
+
+    // --- 500 ألف ---
+    { t: "دخول استنفار أمني أو المباشرة بدون اذن", cat: "500k_up" },
+    { t: "التدخل في شؤون القطاعات الاخرى", cat: "500k_up" },
+    { t: "اسلوب غير لائق", cat: "500k_up" },
+    { t: "عدم طلب كود 3", cat: "500k_up" },
+    { t: "الخروج مشتركة", cat: "500k_break" },
+    { t: "الأفك او الغفوة اكثر من 15 دقيقة", cat: "500k_up" },
+    { t: "سجن رقابي بوظيفة الهلال الأحمر", cat: "500k_up" },
+    { t: "التأخر في العودة للوظيفة بعد انتهاء الاجازة الداخلية", cat: "500k_up" },
+    { t: "الرد بطريقة غير مناسبة بالموجه", cat: "500k_up" },
+    { t: "التدخل في الشؤون الادارية", cat: "500k_up" },
+    { t: "التلاعب على مسؤولين الترقيات", cat: "500k_up" },
+    { t: "التلاعب في دفتر الحضور", cat: "500k_up" },
+    { t: "اهانة اي شخص بالمقاطعة", cat: "500k_up" },
+    { t: "المباشرة في موقع غير آمن", cat: "500k_up" },
+    { t: "التوجه لمعرض السيارات بدون اذن", cat: "500k_up" },
+    { t: "التوجه لكراج التعديل والتزويد بدون اذن", cat: "500k_up" },
+    { t: "عدم الإلتزام بقوانين الإجازة الداخلية", cat: "500k_plain" },
+    { t: "المباشرة في المجرمين بدون اذن العساكر", cat: "500k_plain" },
+    { t: "تظليل مركبة حكومية", cat: "500k_plain" },
+    { t: "الدخول لروم الكادر النسائي", cat: "500k_plain" },
+    { t: "الاستهبال في روم العمليات", cat: "500k_plain" },
+    { t: "دخول برنامج الدولة لطلب الانعاش وقت الاجازة", cat: "500k_up" },
+    { t: "الدخول لموجة الرقابة", cat: "500k_up" },
+    { t: "مباشرة في مركبة غير مخصصه لك", cat: "500k_up" },
+    { t: "كثرة الشكاوي عليه", cat: "500k_final" },
+
+    // --- 750 ألف ---
+    { t: "رفض استلام مهام طاقم العمليات", cat: "750k_ops" },
+    { t: "المباشرة في المجرمين قبل العساكر", cat: "750k_plain" },
+    { t: "حمل ممنوعات واسلحة", cat: "750k_illegal" },
+    { t: "الاستهبال بالميدان", cat: "750k_break" },
+    { t: "مضايقة الكادر النسائي بأي شكل من الأشكال", cat: "750k_break" },
+    { t: "حضور توظيف بدون اخذ الاذن من القيادة", cat: "750k_plain" },
+    { t: "الانتداب بدون اخذ الاذن", cat: "750k_plain" },
+    { t: "تشويه سمعة الهلال الاحمر بأي شكل من الأشكال", cat: "750k_up" },
+
+    // --- المليون والفصل ---
+    { t: "صدم مواطنين بشكل متعمد ومستمر", cat: "1m_break" },
+    { t: "مخالفة قوانين المقاطعة", cat: "1m_fire" },
+    { t: "رتبة عليا في مدينة اخرى", cat: "1m_fire" },
+    { t: "كثرة المخالفات", cat: "1m_fire" },
+    { t: "اعتراض على قرار قيادة", cat: "1m_fire" },
+    { t: "تهرب وظيفي", cat: "1m_fire" },
+    { t: "استقالة قبل الرجوع من الاجازة الداخلية", cat: "1m_fire" },
+    { t: "عدم احترام القيادة / المشرفين", cat: "1m_fire" },
+    { t: "استقالة فترة تدريب", cat: "1m_fire" },
+    { t: "عدم تواجد (انذار نهائي)", cat: "1m_final_noexist" },
+    { t: "عدم تواجد (فصل)", cat: "1m_fire_noexist" },
+    { t: "تلفيت من الدسكورد", cat: "1m_left" },
+    { t: "دخول غير شرعي", cat: "1m_illegal" },
+    { t: "عدم العودة للوظيفة بعد انتهاء اجازة خارجية", cat: "1m_no_return" },
+    { t: "استخدام الرتبة للمصلحة الشخصية", cat: "1m_personal" },
+    { t: "الاجرام بوظيفة الهلال الاحمر", cat: "1m_crime" },
+    { t: "تخريب بوظيفة الهلال الاحمر", cat: "1m_crime" },
+    { t: "تدبيل انعاش", cat: "1m_double" },
+    { t: "اللعن بأي شكل من الأشكال", cat: "1m_crime" },
+    { t: "سب وقذف", cat: "1m_insult" },
+    { t: "تخريب سيناريو", cat: "1m_scenario" },
+    { t: "صدم المتعمد لغرض الانعاش", cat: "1m_ramming" }
+];
+
+let selectedV = null;
+
+function doSearch() {
+    const q = document.getElementById('vSearch').value.toLowerCase();
+    const l = document.getElementById('resList');
+    l.innerHTML = '';
+    if(!q) { l.style.display = 'none'; return; }
+    const filtered = db.filter(i => i.t.toLowerCase().includes(q));
+    if(filtered.length > 0) {
+        l.style.display = 'block';
+        filtered.forEach(i => {
+            const d = document.createElement('div');
+            d.textContent = `[${i.cat.toUpperCase()}] ${i.t}`;
+            d.onclick = () => {
+                document.getElementById('vSearch').value = i.t;
+                selectedV = i;
+                l.style.display = 'none';
+                const isFire = i.cat.includes("fire") || i.cat.includes("1m");
+                document.getElementById('nameFieldContainer').style.display = isFire ? 'block' : 'none';
+            };
+            l.appendChild(d);
+        });
+    } else { l.style.display = 'none'; }
+}
+
+function normalize(id) {
+    id = id.trim();
+    if (id && !id.startsWith("<@")) return `<@${id}>`;
+    return id;
+}
+
+function makeDecision() {
+    const id = normalize(document.getElementById('copyIdInput').value);
+    const sig = document.getElementById('sigChoice').value;
+    const nameStr = document.getElementById('medicNameInput').value.trim();
+    if(!id || !selectedV || !sig) return alert("⚠️ أكمل الخانات!");
+
+    const isFire = selectedV.cat.includes("fire") || selectedV.cat.includes("1m");
+    document.getElementById('rolesPanel').style.display = isFire ? 'block' : 'none';
+
+    let template = "";
+    const t = selectedV.t;
+
+    if(selectedV.cat === "shfhi") {
+        template = `***قرار صادر من <@&1071933370407325807>    ينص على :
+
+
+انـذار شـفـهـي للـمـسـعـف : 
+
+
+${id}
+ 
+
+\`وذلك بسبب (${t})\`
+
+
+توقـيـع :
+${sig}  
+
+
+إعتماد 
+<@&1071933358503903242>  
+@abood.j 
+
+<@&1071933359086911561>***
+@turkiaj1`;
+    } else if(isFire) {
+         // قالب الفصل المطور بجميع تفاصيله
+         template = `***قرار صادر مـن <@&1071933370407325807>    ينص على  :
+
+
+فصل من القطـاع + غرامة مالية بقيمة ( 1,000,000 ) + منع من التوظيف 14 يوم للمسعف :
+
+
+${id}   
+${nameStr}
+
+
+\`وذلك بسبب (${t})\`
+
+
+توقـيـع :
+  
+${sig} 
+
+إعتماد 
+<@&1071933358503903242>  
+<@725655707764129813> 
+
+<@&1071933359086911561>***
+<@813079786855464961>`;
+    } else if(selectedV.cat === "200k") {
+        template = `***قرار صادر من <@&1071933370407325807>    ينص على :
+
+
+انذار اول + غرامة مالية بقيمة ( 200,000 )  للــمــســعـــف : 
+
+
+${id}
+
+
+\`وذلك بسبب (${t})\`
+
+\`مهلة 24 ساعة لفتح تكت مساعدة من القيادة للسداد تجنباً لتدبيلها\`
+
+
+توقـيـع :
+${sig}  
+
+
+إعتماد 
+<@&1071933358503903242> 
+@abood.j 
+
+<@&1071933359086911561>***
+@turkiaj1`;
+    } else if(selectedV.cat === "300k") {
+        template = `***قرار صادر من <@&1071933370407325807>    ينص على :
+
+
+انذار اول + غرامة مالية بقيمة ( 300,000 )  للــمــســعـــف : 
+
+
+${id}
+
+
+\`وذلك بسبب (${t})\`
+
+\`مهلة 24 ساعة لفتح تكت مساعدة من القيادة للسداد تجنباً لتدبيلها\`
+
+
+توقـيـع :
+${sig}  
+
+
+إعتماد 
+<@&1071933358503903242> 
+@abood.j 
+
+<@&1071933359086911561>***
+@turkiaj1`;
+    } else {
+        // قالب غرامات الـ 500 والـ 750 الموحد بنفس المسافات
+        const val = selectedV.cat.startsWith("500") ? "500,000" : "750,000";
+        template = `***قرار صادر من <@&1071933370407325807>    ينص على :
+
+
+انذار اول + غرامة مالية بقيمة ( ${val} )  للــمــســعـــف : 
+
+
+${id}
+
+
+\`وذلك بسبب (${t})\`
+
+\`مهلة 24 ساعة لفتح تكت مساعدة من القيادة للسداد تجنباً لتدبيلها\`
+
+
+توقـيـع :
+${sig}  
+
+
+إعتماد 
+<@&1071933358503903242> 
+@abood.j 
+
+<@&1071933359086911561>***
+@turkiaj1`;
+    }
+
+    document.getElementById('finalBox').textContent = template;
+}
+
+function generateRoleReq(days) {
+    const id = normalize(document.getElementById('copyIdInput').value);
+    if(!id || id === "<@>") return alert("⚠️ أدخل الآيدي!");
+    let type = (days === 14) ? "إزالة رولات + إزالة الاسم + منع 14 يوم" : (days === 7) ? "إزالة رولات + إزالة الاسم + منع 7 أيام" : "إزالة رولات + إزالة الاسم";
+    document.getElementById('roleResultBox').textContent = `الشخص : ${id}\nالموضوع : ${type}\n\n<@&1071933358503903242>\n<@&1071933359086911561>\n<@&1092667422902862004>\n<@&1153823182281777293>`;
+}
+
+function copyText(id) {
+    const t = document.getElementById(id).textContent;
+    if(!t || t.includes("سيظهر")) return;
+    navigator.clipboard.writeText(t);
+    alert("✅ تم النسخ!");
+}
+</script>
+</body>
+</html>
